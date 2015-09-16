@@ -1,10 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
-    fig_caption: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
@@ -13,20 +7,44 @@ output:
     
     load the data from .csv file
 
-```{r}
+
+```r
 data <- read.csv("activity.csv")
 head(data)
+```
+
+```
+##   steps       date interval
+## 1    NA 2012-10-01        0
+## 2    NA 2012-10-01        5
+## 3    NA 2012-10-01       10
+## 4    NA 2012-10-01       15
+## 5    NA 2012-10-01       20
+## 6    NA 2012-10-01       25
+```
+
+```r
 summary(data)
+```
+
+```
+##      steps                date          interval     
+##  Min.   :  0.00   2012-10-01:  288   Min.   :   0.0  
+##  1st Qu.:  0.00   2012-10-02:  288   1st Qu.: 588.8  
+##  Median :  0.00   2012-10-03:  288   Median :1177.5  
+##  Mean   : 37.38   2012-10-04:  288   Mean   :1177.5  
+##  3rd Qu.: 12.00   2012-10-05:  288   3rd Qu.:1766.2  
+##  Max.   :806.00   2012-10-06:  288   Max.   :2355.0  
+##  NA's   :2304     (Other)   :15840
 ```
 
 ###2. Process/transform the data (if necessary) into a format suitable for your analysis
 
     set the date to objects of POSIXct class
 
-```{r}
 
+```r
 data$date <- as.POSIXct(strptime(data$date, format = "%Y-%m-%d"))
-
 ```
 
 
@@ -36,7 +54,8 @@ data$date <- as.POSIXct(strptime(data$date, format = "%Y-%m-%d"))
 
     the total steps per day is calculated with NAs removed
 
-```{r}
+
+```r
 library(plyr)
 Total <- ddply(data, .(date), summarize, Total = sum(steps, na.rm = TRUE))
 ```
@@ -46,8 +65,8 @@ Total <- ddply(data, .(date), summarize, Total = sum(steps, na.rm = TRUE))
     The bar graph (Figure 1A) shows the total steps per day on time scale, and the histogram (Figure 1B)summarize the frequency of the total steps per day on a 1000 steps interval.
 
 
-```{r, fig.height= 8, fig.cap= "**Figure 1 Total Steps per Day**"}
 
+```r
 library(ggplot2)
 library(grid)
 library(scales)
@@ -78,23 +97,26 @@ print(p1, vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
 print(p2, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
 ```
 
+![**Figure 1 Total Steps per Day**](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
+
 
 ###3. Calculate and report the mean and median of the total number of steps taken per day
 
-```{r}
+
+```r
 mean <- mean(Total$Total)
 median <- median(Total$Total)
 ```
 
-The average steps taken per day is **`r mean`**, and the median of it is **`r median`**.
+The average steps taken per day is **9354.2295082**, and the median of it is **10395**.
 
 
 ## What is the average daily activity pattern?
 
 ###1. Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
-```{r, fig.height= 4, fig.cap= "**Figure 2 Average Daily Activity Pattern**"}
 
+```r
 Daily <- ddply(data, .(interval), summarize, Average = mean(steps, na.rm = TRUE))
 
 ## ticks on x axis of every 2 hours
@@ -111,33 +133,60 @@ p <- ggplot(Daily, aes(x= interval, y= Average,group =1))+
 print(p)
 ```
 
+![**Figure 2 Average Daily Activity Pattern**](PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
+
 ###2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
-```{r}
+
+```r
 ind <- which.max(Daily$Average)
 val <- Daily$Average[ind]
 timeind <- format(time[ind], "%H:%M")
 ```
-The maximam number of steps is at interval **`r ind`** , which is at **`r timeind`** of the day.  
-The number of steps is **`r val`**
+The maximam number of steps is at interval **104** , which is at **08:35** of the day.  
+The number of steps is **206.1698113**
 
 
 ## Imputing missing values
 
 ###1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
-```{r}
+
+```r
 NumNAs <- nrow(data[!complete.cases(data),])
 ```
-The total number of missing values in the dataset is **`r NumNAs`**.
+The total number of missing values in the dataset is **2304**.
 
 ###2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
 
     merge the data set and daily activity pattern to make mean of 5-minute interval available for the original dataset. find the missing values(NAs) in steps
 
-```{r}
+
+```r
 newset <- merge(data, Daily, by = "interval")
 
-NAs <- which(is.na(newset$steps))
+summary(newset)
+```
 
+```
+##     interval          steps             date                    
+##  Min.   :   0.0   Min.   :  0.00   Min.   :2012-10-01 00:00:00  
+##  1st Qu.: 588.8   1st Qu.:  0.00   1st Qu.:2012-10-16 00:00:00  
+##  Median :1177.5   Median :  0.00   Median :2012-10-31 00:00:00  
+##  Mean   :1177.5   Mean   : 37.38   Mean   :2012-10-30 23:32:27  
+##  3rd Qu.:1766.2   3rd Qu.: 12.00   3rd Qu.:2012-11-15 00:00:00  
+##  Max.   :2355.0   Max.   :806.00   Max.   :2012-11-30 00:00:00  
+##                   NA's   :2304                                  
+##     Average       
+##  Min.   :  0.000  
+##  1st Qu.:  2.486  
+##  Median : 34.113  
+##  Mean   : 37.383  
+##  3rd Qu.: 52.835  
+##  Max.   :206.170  
+## 
+```
+
+```r
+NAs <- which(is.na(newset$steps))
 ```
 
 
@@ -145,25 +194,23 @@ NAs <- which(is.na(newset$steps))
 
     replace NAs with mean for the 5-minute interval and save it to the new dataset
 
-```{r}
 
+```r
 newset[NAs, "steps"] <- newset[NAs,"Average"]
-
 ```
 
 ###4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
     Calculate the total number of steps taken each day
-```{r}
 
+```r
 Total.New <- ddply(newset, .(date), summarize, Total = sum(steps))
-
 ```
 
     Plot the histogram of the total number of steps taken each day
 
-```{r, fig.height= 4, fig.cap= "**Figure 3 Histogram of Total Steps of the Day after Imputing Missing Value**"}
 
+```r
 ## histogram
 p <- ggplot(Total.New, aes(x= Total)) +
         geom_histogram(col = "white", fill = "blue", binwidth = 1000) +
@@ -172,19 +219,31 @@ p <- ggplot(Total.New, aes(x= Total)) +
         ggtitle("Histogram of Total Steps of the Day")
 
 print(p)
-
 ```
+
+![**Figure 3 Histogram of Total Steps of the Day after Imputing Missing Value**](PA1_template_files/figure-html/unnamed-chunk-12-1.png) 
 
     Calculate the mean and median of the new dataset
 
-```{r}
 
+```r
 mean.New <- mean(Total.New$Total)
 mean.New
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median.New <- median(Total.New$Total)
 median.New
 ```
-The average steps taken per day is `r mean.New`, and the median of it is `r median.New`.  
+
+```
+## [1] 10766.19
+```
+The average steps taken per day is 1.0766189\times 10^{4}, and the median of it is 1.0766189\times 10^{4}.  
 
 After replacing missing value with the mean of 5-minute interval, the mean value of the total steps of the day becomes the median of the original data. The median of the new dataset is the same as the one of the original.
 
@@ -194,20 +253,21 @@ After replacing missing value with the mean of 5-minute interval, the mean value
 
     New column called "Weekend" is added to new dataset.
 
-```{r}
+
+```r
 library(chron)
 newset[,"Weekend"]<- is.weekend(newset$date)
 newset$Weekend <- factor(newset$Weekend, labels = c("Weekday","Weekend"))
 ```
 
     Calculate the activity pattern according to the new column value
-```{r}
-Daily.New <- ddply(newset, .(interval, Weekend), summarize, Average = mean(steps, na.rm = TRUE))
 
+```r
+Daily.New <- ddply(newset, .(interval, Weekend), summarize, Average = mean(steps, na.rm = TRUE))
 ```
 
-```{r,fig.height= 8, fig.cap= "**Figure 4 Activity Patterns of Weekdays and Weekends**"}
 
+```r
 p <- ggplot(Daily.New, aes(x= interval, y= Average,group = Weekend))+
         geom_line(colour = "blue") +
         facet_grid(Weekend~.) +
@@ -217,3 +277,5 @@ p <- ggplot(Daily.New, aes(x= interval, y= Average,group = Weekend))+
 
 print(p)
 ```
+
+![**Figure 4 Activity Patterns of Weekdays and Weekends**](PA1_template_files/figure-html/unnamed-chunk-16-1.png) 
