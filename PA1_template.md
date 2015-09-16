@@ -126,7 +126,7 @@ breaks <- which(format(time,"%M")=="00" & as.numeric(format(time,"%H")) %% 2 == 
 
 p <- ggplot(Daily, aes(x= interval, y= Average,group =1))+
         geom_line(colour = "blue") +
-        xlab("Date") +
+        xlab("Time") +
         ylab("Total Steps of the Day") +
         ggtitle("Line graph of Total Steps of the Day") +
         scale_x_discrete(breaks = factor(Daily$interval[breaks]), labels = format(time[breaks], "%H:%M"))
@@ -163,29 +163,6 @@ The total number of missing values in the dataset is **2304**.
 ```r
 newset <- merge(data, Daily, by = "interval")
 
-summary(newset)
-```
-
-```
-##     interval          steps             date                    
-##  Min.   :   0.0   Min.   :  0.00   Min.   :2012-10-01 00:00:00  
-##  1st Qu.: 588.8   1st Qu.:  0.00   1st Qu.:2012-10-16 00:00:00  
-##  Median :1177.5   Median :  0.00   Median :2012-10-31 00:00:00  
-##  Mean   :1177.5   Mean   : 37.38   Mean   :2012-10-30 23:32:27  
-##  3rd Qu.:1766.2   3rd Qu.: 12.00   3rd Qu.:2012-11-15 00:00:00  
-##  Max.   :2355.0   Max.   :806.00   Max.   :2012-11-30 00:00:00  
-##                   NA's   :2304                                  
-##     Average       
-##  Min.   :  0.000  
-##  1st Qu.:  2.486  
-##  Median : 34.113  
-##  Mean   : 37.383  
-##  3rd Qu.: 52.835  
-##  Max.   :206.170  
-## 
-```
-
-```r
 NAs <- which(is.na(newset$steps))
 ```
 
@@ -271,7 +248,7 @@ Daily.New <- ddply(newset, .(interval, Weekend), summarize, Average = mean(steps
 p <- ggplot(Daily.New, aes(x= interval, y= Average,group = Weekend))+
         geom_line(colour = "blue") +
         facet_grid(Weekend~.) +
-        xlab("Date") +
+        xlab("Time") +
         ylab("Total Steps of the Day") +
         scale_x_discrete(breaks = factor(Daily.New$interval[breaks*2]), labels = format(time[breaks], "%H:%M"))
 

@@ -104,7 +104,7 @@ breaks <- which(format(time,"%M")=="00" & as.numeric(format(time,"%H")) %% 2 == 
 
 p <- ggplot(Daily, aes(x= interval, y= Average,group =1))+
         geom_line(colour = "blue") +
-        xlab("Date") +
+        xlab("Time") +
         ylab("Total Steps of the Day") +
         ggtitle("Line graph of Total Steps of the Day") +
         scale_x_discrete(breaks = factor(Daily$interval[breaks]), labels = format(time[breaks], "%H:%M"))
@@ -211,7 +211,7 @@ Daily.New <- ddply(newset, .(interval, Weekend), summarize, Average = mean(steps
 p <- ggplot(Daily.New, aes(x= interval, y= Average,group = Weekend))+
         geom_line(colour = "blue") +
         facet_grid(Weekend~.) +
-        xlab("Date") +
+        xlab("Time") +
         ylab("Total Steps of the Day") +
         scale_x_discrete(breaks = factor(Daily.New$interval[breaks*2]), labels = format(time[breaks], "%H:%M"))
 
